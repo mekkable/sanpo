@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46403069869",
+    "project_id": "sanpo-26e4c",
+    "storage_bucket": "sanpo-26e4c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46403069869:android:7fb49f5581cc63ad54e324",
+        "android_client_info": {
+          "package_name": "com.example.sanpo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa5L6WGNV8uiV-IGYEQjWnMWhYoF6iPpY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
