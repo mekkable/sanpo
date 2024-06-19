@@ -25,8 +25,6 @@ class DogDetailPage extends HookConsumerWidget {
     useEffect(() {
       currentUserAsyncValue.whenData((userModel) {
         if (userModel == null || userModel.dogs.isEmpty) {
-          print(userModel == null);
-          print(userModel!.dogs.isEmpty);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.pushReplacement(
               context,
@@ -49,11 +47,23 @@ class DogDetailPage extends HookConsumerWidget {
 
     return currentUserAsyncValue.when(
       data: (userModel) {
-        if (userModel == null ||
-            userModel.dogs.isEmpty ||
-            selectedDog == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        if (userModel == null) return Text('ログインしてください');
+        if (userModel.dogs.isEmpty) return Text('犬を登録してください');
+        if (selectedDog == null)
+          //この遷移先でボタンがなぜか押せない
+          //
+          //
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DogCreateScreen(),
+            ),
+          );
+        ;
+        //
+        //
+        //
+        //
 
         final dog = selectedDog;
         return Padding(
@@ -61,10 +71,6 @@ class DogDetailPage extends HookConsumerWidget {
           child: Column(
             children: [
               OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  shape: const StadiumBorder(),
-                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -73,7 +79,10 @@ class DogDetailPage extends HookConsumerWidget {
                     ),
                   );
                 },
-                child: const Text('Button'),
+                child: const Text(
+                  '犬一覧',
+                  style: TextStyle(fontSize: 24),
+                ),
               ),
               Row(
                 children: [
@@ -101,7 +110,7 @@ class DogDetailPage extends HookConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          dog.name,
+                          dog!.name,
                           style: const TextStyle(fontSize: 24),
                         ),
                         const SizedBox(height: 8),
@@ -180,6 +189,7 @@ class DogAppBar extends ConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDog = ref.watch(selectedDogProvider);
     return AppBar(
+      automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

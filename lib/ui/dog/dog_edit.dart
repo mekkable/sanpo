@@ -36,6 +36,7 @@ class DogEditPage extends HookConsumerWidget {
       );
 
       await firestoreService.updateDog(updatedDog);
+      ref.read(selectedDogProvider.notifier).state = updatedDog;
 
       // 更新が完了したら前の画面に戻る
       Navigator.of(context).pop();

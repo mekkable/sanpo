@@ -67,13 +67,6 @@ class _DogRegistrationPageState extends ConsumerState<DogCreatePage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: InkWell(
-          onTap: () => Navigator.pop(context),
-          child: Icon(
-            Icons.abc,
-            size: 32,
-          ),
-        ),
         title: const Text('犬の登録'),
       ),
       body: Padding(
@@ -147,12 +140,8 @@ class _DogRegistrationPageState extends ConsumerState<DogCreatePage> {
                       if (newDog != null) {
                         // 登録した犬を選択
                         ref.read(selectedDogProvider.notifier).state = newDog;
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DogDetailPage(),
-                          ),
-                        );
+                        ref.refresh(currentUserProvider);
+                        Navigator.pushReplacementNamed(context, '/');
                       }
                     }
                   }
