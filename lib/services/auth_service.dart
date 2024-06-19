@@ -19,7 +19,9 @@ class AuthService {
 
     User? user = userCredential.user;
     if (user != null) {
-      // Firestoreにユーザードキュメントを作成
+      // UserModelのtoFirestoreメソッドを使って、ユーザードキュメントを作成してもいい
+      //
+      //
       await _firestore.collection('users').doc(user.uid).set({
         'name': name,
         'email': email,
@@ -28,6 +30,9 @@ class AuthService {
         'dogs': [],
         'schedules': [],
       });
+      //
+      //
+      //
     }
   }
 

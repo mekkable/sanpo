@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sanpo/models/schedule_model.dart';
 import 'package:sanpo/providers.dart';
 import 'package:sanpo/services/auth_service.dart';
 import 'package:sanpo/ui/auth/login.dart';
@@ -17,7 +18,7 @@ import 'package:sanpo/ui/dog/dog_show.dart';
 import 'package:sanpo/ui/schedule/schedule_index.dart';
 import 'package:sanpo/ui/schedule/schedule_show.dart';
 import 'package:sanpo/ui/user/profile_edit.dart';
-import 'package:sanpo/ui/user/user.dart';
+import 'package:sanpo/ui/user/user_show.dart';
 
 import 'firebase_options.dart';
 import 'tabs_page.dart';
@@ -160,96 +161,36 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+class HomeAppBar extends HookConsumerWidget implements PreferredSizeWidget {
   const HomeAppBar({
     super.key,
   });
-  void showBottomSheetDemo(BuildContext context) {
-    showModalBottomSheet<dynamic>(
+
+  Future<void> selectUser(BuildContext context, WidgetRef ref) async {
+    final firestoreService = ref.read(firestoreServiceProvider);
+    final selectedDog = ref.watch(selectedDogProvider);
+    final users = await firestoreService.getUserByDogId(selectedDog!.id);
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 700,
-          width: MediaQuery.sizeOf(context).width,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '犬：',
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '日にち：',
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'ユーザー：',
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      '検索',
-                      style: TextStyle(fontSize: 32),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+      builder: (context) {
+        return Material(
+          child: ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              if (user == null) {
+                return const Text('ユーザーが見つかりません。Dog一覧画面から追加してください');
+              }
+              return ListTile(
+                  // leading: Image.network(user.profileImage),
+                  title: Text(user.name),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ScheduleByUser(user.id)));
+                  });
+            },
           ),
         );
       },
@@ -257,8 +198,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AppBar(
+      automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -272,7 +214,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           InkWell(
             onTap: () {
-              showBottomSheetDemo(context);
+              selectUser(context, ref);
             },
             child: Icon(
               Icons.search,
@@ -286,6 +228,47 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+//検索結果画面
+class ScheduleByUser extends HookConsumerWidget {
+  final String userId;
+
+  const ScheduleByUser(this.userId, {super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final schedulesAsyncValue = ref.watch(schedulesProvider(userId));
+
+    return schedulesAsyncValue.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) {
+        print('error: $error');
+        return Center(child: Text('Error: $error'));
+      },
+      data: (schedules) {
+        if (schedules == null || schedules.isEmpty) {
+          return const Center(child: Text('スケジュールがありません'));
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('スケジュール一覧'),
+          ),
+          body: ListView.builder(
+            itemCount: schedules.length,
+            itemBuilder: (context, index) {
+              final schedule = schedules[index];
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ScheduleCard(schedule: schedule),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 }
 
 class DateAndWeather extends StatelessWidget {
