@@ -44,8 +44,8 @@ class LoginPage extends HookConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final email = 'example@example.com';
-                final password = 'example';
+                final email = 'konatsu2@mail.com';
+                final password = '123456';
                 await authService.signInWithEmailAndPassword(email, password);
                 print(email);
                 print(password);
