@@ -1,16 +1,12 @@
 # sanpo
 
-A new Flutter project.
+こちらは勉強のために現在開発中の犬の散歩の管理アプリです。　　
 
-## Getting Started
+## tech
 
-This project is a starting point for a Flutter application.
+フロントエンドはflutter、バックエンドはFirebase、状態管理はriverpodを用いてます。
 
-A few resources to get you started if this is your first Flutter project:
+## directory構成について
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+UIに関するコードをまとめたuiディレクトリ、dog,user,scheduleモデルを格納するmodelsディレクトリ、　　
+firebaseのauthやfirestoreを扱うservieceディレクトリ、状態を管理するprovidersディレクトリなどです。
